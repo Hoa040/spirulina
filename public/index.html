@@ -594,7 +594,7 @@
     }
 
     async function loadRecords(id) {
-      const records = await api(`/api/Sensors/${id}/GetAllRecords`);
+      const records = await api(`/api/Sensors/records/${id}`);
       allRecords = records;
       renderSensorCards(records);
       renderChart();
@@ -776,8 +776,8 @@
       }));
 
       const url = editingRecordId 
-        ? `/api/Sensors/${currentDefId}/UpdateRecordById/${editingRecordId}`
-        : `/api/Sensors/${currentDefId}/records`;
+        ? `/api/Sensors/records/${currentDefId}/update/${editingRecordId}`
+        : `/api/Sensors/records/${currentDefId}`;
       
       const res = await api(url, 'POST', { values });
       if (res._id || res.message) {
@@ -791,7 +791,7 @@
       if (!token) { toast('Auth required', 'error'); return; }
       if (!confirm('Are you sure you want to delete this record?')) return;
       
-      const res = await api(`/api/Sensors/${currentDefId}/DeleteRecordById/${id}`, 'POST');
+      const res = await api(`/api/Sensors/records/${currentDefId}/delete/${id}`, 'POST');
       if (res.message) {
         toast('Record Purged');
         loadRecords(currentDefId);
@@ -823,9 +823,9 @@
 
     // Dev Tools
     async function qaCreateDef() { await api('/api/Sensors/definitions', 'POST', JSON.parse(document.getElementById('qa-body').value || '{}')); loadAll(); }
-    async function qaCreateRec() { await api(`/api/Sensors/${currentDefId}/records`, 'POST', JSON.parse(document.getElementById('qa-body').value || '{}')); loadRecords(currentDefId); }
-    async function qaUpdate() { await api(`/api/Sensors/${currentDefId}/UpdateRecordById/${document.getElementById('qa-rec-id').value}`, 'POST', JSON.parse(document.getElementById('qa-body').value || '{}')); loadRecords(currentDefId); }
-    async function qaDelete() { if(confirm('Purge all?')) { await api(`/api/Sensors/${currentDefId}/DeleteRecords`, 'POST'); loadRecords(currentDefId); } }
+    async function qaCreateRec() { await api(`/api/Sensors/records/${currentDefId}`, 'POST', JSON.parse(document.getElementById('qa-body').value || '{}')); loadRecords(currentDefId); }
+    async function qaUpdate() { await api(`/api/Sensors/records/${currentDefId}/update/${document.getElementById('qa-rec-id').value}`, 'POST', JSON.parse(document.getElementById('qa-body').value || '{}')); loadRecords(currentDefId); }
+    async function qaDelete() { if(confirm('Purge all?')) { await api(`/api/Sensors/records/${currentDefId}/delete-all`, 'POST'); loadRecords(currentDefId); } }
   </script>
 </body>
 

@@ -12,7 +12,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Routes
-import sensorRoutes from './routes/sensorRoutes.js';
+import definitionRoutes from './routes/definitionRoutes.js';
+import recordRoutes from './routes/recordRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 
 dotenv.config();
@@ -28,7 +29,8 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
 // Mount API routes
-app.use('/api/Sensors', sensorRoutes);
+app.use('/api/Sensors/definitions', definitionRoutes);
+app.use('/api/Sensors/records', recordRoutes);
 app.use('/api/auth', authRoutes);
 
 // Fallback: serve index.html for root
