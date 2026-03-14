@@ -3,7 +3,7 @@ import {
     getAllDefinitions,
     getActiveDefinition,
     createDefinition
-} from '../controllers/sensorController.js';
+} from '../controllers/definitionController.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
