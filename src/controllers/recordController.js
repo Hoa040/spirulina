@@ -1,4 +1,69 @@
 import { Record } from '../models/Record.js';
+import { Definition } from '../models/Definition.js';
+
+// GET: api/Sensors/records/active/records
+// Xuất tất cả các records theo cấu trúc bảng được cho trước / các records cho structure là active
+export const getRecordsForActiveDefinition = async (req, res) => {
+    try {
+        const activeDef = await Definition.findOne({ active: true });
+        if (!activeDef) {
+            return res.status(404).json({ message: 'No active definition found' });
+        }
+        const records = await Record.find({ definition_id: activeDef._id });
+        res.json(records);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// GET: api/Sensors/records/filter
+// Xuất các records theo ngưỡng và loại thông tin cần lọc
+// Query params: key, min, max
+export const getFilteredRecords = async (req, res) => {
+    try {
+        const { key, min, max } = req.query;
+        const query = {};
+        
+        if (key) {
+            const valueFilter = { $elemMatch: { key } };
+            if (min !== undefined) valueFilter.$elemMatch.value = { ...valueFilter.$elemMatch.value, $gte: Number(min) };
+            if (max !== undefined) valueFilter.$elemMatch.value = { ...valueFilter.$elemMatch.value, $lte: Number(max) };
+            query.values = valueFilter;
+        }
+
+        const records = await Record.find(query);
+        res.json(records);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// GET: api/Sensors/records/complex-structure
+// xuất ra tất cả những records mà có cấu trúc bảng gồm 5 trường trở lên
+export const getRecordsByStructureSize = async (req, res) => {
+    try {
+        // Find definitions with 5 or more columns
+        const definitions = await Definition.find({ $expr: { $gte: [{ $size: "$columns" }, 5] } });
+        const defIds = definitions.map(d => d._id);
+        
+        const records = await Record.find({ definition_id: { $in: defIds } });
+        res.json(records);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// GET: api/Sensors/records/recent
+// Xuát các dòng dữ liệu trong bảng records mà được tạo sau ngày 1/2/2026
+export const getRecentRecords = async (req, res) => {
+    try {
+        const date = new Date('2026-02-01');
+        const records = await Record.find({ created_date: { $gt: date } });
+        res.json(records);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 
 // GET: api/Sensors/:definition_id/GetAllRecords
 export const getAllRecords = async (req, res) => {

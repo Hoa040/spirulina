@@ -12,3 +12,13 @@
 
 Lưu ý là làm với 2 collection definitions, và records. 
 Sẽ có điểm cộng cho những bạn làm được phần JWT khi gọi đến những link cho POST method.
+5. swagger 
+- document cái API ví dụ localhost:3000/definitions/.id
+- chạy ra được doc trên swagger 
+6.
+- Xuất tất cả các records theo cấu trúc bảng được cho trước / các records cho structure là active
+- Xuất các records theo ngưỡng và loại thông tin cần lọc 
+(xuất các dòng dữ liệu với nhiệt độ từ 25 => 27 độ c) 
+- Đối với những endpoint về xóa => verifyToken.
+- xuất ra tất cả những records mà có cấu trúc bảng gồm 5 trường trở lên
+- Xuát các dòng dữ liệu trong bảng records mà được tạo sau ngày 1/2/2026

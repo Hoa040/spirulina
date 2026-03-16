@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { connectDB } from './config/db.js';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 // Models for background task
 import { Definition } from './models/Definition.js';
@@ -32,6 +34,37 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use('/api/Sensors/definitions', definitionRoutes);
 app.use('/api/Sensors/records', recordRoutes);
 app.use('/api/auth', authRoutes);
+
+// Swagger Documentation
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Tao Xoan Spirulina API',
+            version: '1.0.0',
+            description: 'REST API documentation for Spirulina Sensors cultivation system',
+        },
+        servers: [
+            {
+                url: 'http://localhost:3000',
+                description: 'Development server',
+            },
+        ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT',
+                },
+            },
+        },
+    },
+    apis: ['./src/routes/*.js'], // Path to the API docs
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Fallback: serve index.html for root
 app.get('/', (req, res) => {

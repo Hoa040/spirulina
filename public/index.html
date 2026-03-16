@@ -370,6 +370,9 @@
         <div class="nav-link" onclick="showView('stations')">
           <i data-lucide="radio" size="18"></i> Stations
         </div>
+        <div class="nav-link" id="nav-reports" onclick="showView('reports')">
+          <i data-lucide="file-text" size="18"></i> Reports
+        </div>
         <div class="nav-link" onclick="showView('settings')">
           <i data-lucide="terminal" size="18"></i> Developer
         </div>
@@ -469,6 +472,65 @@
         </div>
       </div>
 
+      <!-- REPORTS VIEW (Requirement 6) -->
+      <div class="col-12" id="reports-view" style="display:none;">
+        <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+          <!-- Controls -->
+          <div style="display:flex; flex-direction:column; gap:1.5rem;">
+            <div class="card">
+              <div class="card-header"><span class="card-title">Filter Records</span></div>
+              <div class="card-body">
+                <div style="display:flex; flex-direction:column; gap:1rem;">
+                  <div>
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem; text-transform:uppercase">Sensor Key</label>
+                    <input type="text" id="filter-key" placeholder="e.g. temperature_C">
+                  </div>
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
+                    <div>
+                      <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem; text-transform:uppercase">Min</label>
+                      <input type="number" id="filter-min" placeholder="0">
+                    </div>
+                    <div>
+                      <label style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.4rem; text-transform:uppercase">Max</label>
+                      <input type="number" id="filter-max" placeholder="100">
+                    </div>
+                  </div>
+                  <button class="btn btn-primary" style="width:100%" onclick="fetchFilteredReport()">Generate Report</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><span class="card-title">Quick Reports</span></div>
+              <div class="card-body">
+                <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                  <button class="btn btn-secondary" style="justify-content:flex-start" onclick="fetchActiveReport()">
+                    <i data-lucide="activity" size="16"></i> Active Definition Records
+                  </button>
+                  <button class="btn btn-secondary" style="justify-content:flex-start" onclick="fetchComplexReport()">
+                    <i data-lucide="layers" size="16"></i> 5+ Field Structures
+                  </button>
+                  <button class="btn btn-secondary" style="justify-content:flex-start" onclick="fetchRecentReport()">
+                    <i data-lucide="calendar" size="16"></i> Records after Feb 1, 2026
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Results -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title" id="report-title">Report Results</span>
+              <span id="report-count" style="font-size:0.75rem; color:var(--text-muted)"></span>
+            </div>
+            <div class="table-container" id="report-results-container">
+              <div class="empty">Select a report or filter to begin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- DEVELOPER VIEW -->
       <div class="col-12" id="settings-view" style="display:none;">
         <div class="card">
@@ -539,9 +601,11 @@
       
       const table = document.getElementById('table-view');
       const settings = document.getElementById('settings-view');
+      const reports = document.getElementById('reports-view');
       
       table.style.display = view === 'analytics' ? 'block' : 'none';
       settings.style.display = view === 'settings' ? 'block' : 'none';
+      reports.style.display = view === 'reports' ? 'block' : 'none';
       
       const overviewElements = document.querySelectorAll('.col-8, .col-4');
       overviewElements.forEach(el => el.style.display = (view === 'overview' || view === 'stations') ? 'block' : 'none');
@@ -796,6 +860,66 @@
         toast('Record Purged');
         loadRecords(currentDefId);
       }
+    }
+
+    // REQUIREMENT 6: REPORTING FUNCTIONS
+    async function fetchActiveReport() {
+      setReportLoading('Active Definition Records');
+      const data = await api('/api/Sensors/records/active-records');
+      renderReportTable(data);
+    }
+
+    async function fetchFilteredReport() {
+      const key = document.getElementById('filter-key').value;
+      const min = document.getElementById('filter-min').value;
+      const max = document.getElementById('filter-max').value;
+      
+      if (!key) { toast('Please enter a sensor key', 'error'); return; }
+      
+      setReportLoading(`Filter: ${key} (${min || '-'} to ${max || '-'})`);
+      const data = await api(`/api/Sensors/records/filter?key=${key}&min=${min}&max=${max}`);
+      renderReportTable(data);
+    }
+
+    async function fetchComplexReport() {
+      setReportLoading('5+ Field Structures');
+      const data = await api('/api/Sensors/records/complex-structure');
+      renderReportTable(data);
+    }
+
+    async function fetchRecentReport() {
+      setReportLoading('Records after Feb 1, 2026');
+      const data = await api('/api/Sensors/records/recent');
+      renderReportTable(data);
+    }
+
+    function setReportLoading(title) {
+      document.getElementById('report-title').innerText = title;
+      document.getElementById('report-results-container').innerHTML = '<div class="empty">Scanning database...</div>';
+      document.getElementById('report-count').innerText = '';
+    }
+
+    function renderReportTable(records) {
+      const container = document.getElementById('report-results-container');
+      if (!records || !records.length) {
+        container.innerHTML = '<div class="empty">No records match these criteria</div>';
+        return;
+      }
+
+      document.getElementById('report-count').innerText = `(${records.length} found)`;
+      const keys = [...new Set(records.flatMap(r => r.values.map(v => v.key)))];
+      
+      container.innerHTML = `
+        <table>
+          <thead><tr><th>Time</th>${keys.map(k => `<th>${k}</th>`).join('')}</tr></thead>
+          <tbody>${records.map(r => `
+            <tr>
+              <td>${new Date(r.created_date).toLocaleString()}</td>
+              ${keys.map(k => `<td>${r.values.find(v => v.key === k)?.value ?? '-'}</td>`).join('')}
+            </tr>
+          `).join('')}</tbody>
+        </table>`;
+      lucide.createIcons();
     }
 
     // Helpers
