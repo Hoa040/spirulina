@@ -223,7 +223,7 @@ router.post('/:definitions_id/delete-all', protect, deleteRecords);
 
 /**
  * @swagger
- * /api/Sensors/records/{definitions_id}/delete/{record_id}:
+ * /api/Sensors/records/{definitions_id}/delete/{id}:
  *   post:
  *     summary: Delete a specific record
  *     tags: [Records]
@@ -236,7 +236,7 @@ router.post('/:definitions_id/delete-all', protect, deleteRecords);
  *           type: string
  *         required: true
  *       - in: path
- *         name: record_id
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
@@ -244,11 +244,11 @@ router.post('/:definitions_id/delete-all', protect, deleteRecords);
  *       200:
  *         description: Record deleted
  */
-router.post('/:definitions_id/delete/:record_id', protect, deleteRecordById);
+router.post('/:definitions_id/delete/:id', protect, deleteRecordById);
 
 /**
  * @swagger
- * /api/Sensors/records/{definitions_id}/update/{record_id}:
+ * /api/Sensors/records/{definitions_id}/update/{id}:
  *   post:
  *     summary: Update a specific record
  *     tags: [Records]
@@ -261,7 +261,7 @@ router.post('/:definitions_id/delete/:record_id', protect, deleteRecordById);
  *           type: string
  *         required: true
  *       - in: path
- *         name: record_id
+ *         name: id
  *         schema:
  *           type: string
  *         required: true
@@ -275,6 +275,6 @@ router.post('/:definitions_id/delete/:record_id', protect, deleteRecordById);
  *       200:
  *         description: Record updated
  */
-router.post('/:definitions_id/update/:record_id', protect, updateRecordById);
+router.post('/:definitions_id/update/:id', protect, updateRecordById);
 
 export default router;

@@ -2,7 +2,10 @@ import express from 'express';
 import {
     getAllDefinitions,
     getActiveDefinition,
-    createDefinition
+    createDefinition,
+    getDefinition,
+    updateDefinition,
+    deleteDefinition
 } from '../controllers/definitionController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -108,5 +111,71 @@ router.get('/active', getActiveDefinition);
  *         description: Unauthorized
  */
 router.post('/', protect, createDefinition);
+
+/**
+ * @swagger
+ * /api/Sensors/definitions/{id}:
+ *   get:
+ *     summary: Get a sensor definition by ID
+ *     tags: [Definitions]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: The definition
+ *       404:
+ *         description: Not found
+ */
+router.get('/:id', getDefinition);
+
+/**
+ * @swagger
+ * /api/Sensors/definitions/{id}:
+ *   put:
+ *     summary: Update a sensor definition
+ *     tags: [Definitions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Definition'
+ *     responses:
+ *       201:
+ *         description: Updated
+ */
+router.put('/:id', protect, updateDefinition);
+
+/**
+ * @swagger
+ * /api/Sensors/definitions/{id}:
+ *   delete:
+ *     summary: Delete a sensor definition
+ *     tags: [Definitions]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *     responses:
+ *       201:
+ *         description: Deleted
+ */
+router.delete('/:id', protect, deleteDefinition);
 
 export default router;

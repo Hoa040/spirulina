@@ -1,14 +1,8 @@
 import { Definition } from '../models/Definition.js';
+import genericController from './genericController.js';
 
 // GET: api/Sensors/definitions
-export const getAllDefinitions = async (req, res) => {
-    try {
-        const definitions = await Definition.find({});
-        res.json(definitions);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+export const getAllDefinitions = genericController.getAll(Definition);
 
 // GET: api/Sensors/definitions/active
 export const getActiveDefinition = async (req, res) => {
@@ -25,12 +19,13 @@ export const getActiveDefinition = async (req, res) => {
 };
 
 // POST: api/Sensors/definitions
-export const createDefinition = async (req, res) => {
-    try {
-        const newDef = new Definition(req.body);
-        const savedDef = await newDef.save();
-        res.status(201).json(savedDef);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+export const createDefinition = genericController.create(Definition);
+
+// GET: api/Sensors/definitions/:id
+export const getDefinition = genericController.get(Definition);
+
+// PUT/POST: api/Sensors/definitions/:id
+export const updateDefinition = genericController.update(Definition);
+
+// DELETE: api/Sensors/definitions/:id
+export const deleteDefinition = genericController.delete(Definition);

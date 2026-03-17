@@ -927,11 +927,27 @@
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
       try {
+        console.log(`API Call: ${method} ${url}`);
         const r = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
         const d = await r.json();
-        if (!r.ok) toast(d.message || 'Error', 'error');
-        return d;
-      } catch (e) { toast('Offline', 'error'); return {}; }
+        
+        if (!r.ok) {
+          console.error(`API Error (${r.status}):`, d);
+          toast(d.message || 'Error', 'error');
+        }
+        
+        // Unwrap generic response
+        let finalData = d;
+        if (d && d.results !== undefined) finalData = d.results;
+        else if (d && d.result !== undefined) finalData = d.result;
+        
+        console.log(`API Response from ${url}:`, finalData);
+        return finalData;
+      } catch (e) { 
+        console.error(`API Exception:`, e);
+        toast('Offline or Connection Error', 'error'); 
+        return null; 
+      }
     }
 
     function toast(msg, type = 'success') {
